@@ -24,6 +24,12 @@ const volunteerLinks = [
     end: true,
   },
   {
+    to: '/volunteer/mark-attendance-qr',
+    label: 'Mark Attendance',
+    description: 'Show live QR code',
+    icon: UserRound,
+  },
+  {
     to: '/volunteer/profile',
     label: 'Profile',
     description: 'Your contact details',

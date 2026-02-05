@@ -5,6 +5,7 @@ import Login from './pages/Login';
 import StudentDashboard from './pages/StudentDashboard';
 import VolunteerDashboard from './pages/VolunteerDashboard';
 import VolunteerHome from './pages/volunteer/VolunteerHome';
+import VolunteerMarkAttendance from './pages/volunteer/VolunteerMarkAttendance';
 import VolunteerProfile from './pages/volunteer/VolunteerProfile';
 import { getRole, getToken } from './services/auth';
 import { Toaster } from './components/ui/sonner';
@@ -65,6 +66,7 @@ function App() {
           }
         >
           <Route index element={<VolunteerHome />} />
+          <Route path="mark-attendance-qr" element={<VolunteerMarkAttendance />} />
           <Route path="profile" element={<VolunteerProfile />} />
         </Route>
         <Route

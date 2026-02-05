@@ -19,6 +19,7 @@ const StudentDashboard = () => {
   const token = getToken();
   const [events, setEvents] = useState([]);
   const [activeSection, setActiveSection] = useState('available');
+  const [registeringId, setRegisteringId] = useState(null);
 
   const handleUnauthorized = () => {
     clearAuth();
@@ -50,6 +51,28 @@ const StudentDashboard = () => {
     fetchEvents();
   }, []);
 
+  const handleRegister = async (event) => {
+    if (!token || !event?.slug) return;
+    setRegisteringId(event.slug);
+
+    try {
+      await authRequest(`/api/student/events/${event.slug}/register`, token, {
+        method: 'POST',
+      });
+      toast.success('Registered successfully');
+      const data = await authRequest('/api/student/events', token);
+      setEvents(data);
+    } catch (error) {
+      if (error.message.toLowerCase().includes('authorization') || error.message.toLowerCase().includes('token')) {
+        handleUnauthorized();
+      } else {
+        toast.error(error.message);
+      }
+    } finally {
+      setRegisteringId(null);
+    }
+  };
+
   const sectionMeta = {
     available: {
       title: 'Available Events',
@@ -70,7 +93,11 @@ const StudentDashboard = () => {
       subtitle={sectionMeta[activeSection].subtitle}
     >
       {activeSection === 'available' ? (
-        <StudentEventList events={events} />
+        <StudentEventList
+          events={events}
+          onRegister={handleRegister}
+          registeringId={registeringId}
+        />
       ) : (
         <StudentCertificatesPanel />
       )}

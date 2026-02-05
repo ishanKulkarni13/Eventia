@@ -19,6 +19,7 @@ const UpdateEventPanel = ({ events, onUpdate, loading }) => {
   );
   const [form, setForm] = useState({
     title: '',
+    slug: '',
     description: '',
     date: '',
     location: '',
@@ -31,6 +32,7 @@ const UpdateEventPanel = ({ events, onUpdate, loading }) => {
     if (!event) return;
     setForm({
       title: event.title || '',
+      slug: event.slug || '',
       description: event.description || '',
       date: event.date ? event.date.slice(0, 10) : '',
       location: event.location || '',
@@ -43,6 +45,7 @@ const UpdateEventPanel = ({ events, onUpdate, loading }) => {
     if (!selectedEvent) return;
     onUpdate(selectedEvent._id, {
       title: form.title,
+      slug: form.slug,
       description: form.description,
       date: form.date,
       location: form.location,
@@ -90,6 +93,15 @@ const UpdateEventPanel = ({ events, onUpdate, loading }) => {
                   id="update-title"
                   value={form.title}
                   onChange={(event) => setForm((prev) => ({ ...prev, title: event.target.value }))}
+                  required
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="update-slug">Event ID (slug)</Label>
+                <Input
+                  id="update-slug"
+                  value={form.slug}
+                  onChange={(event) => setForm((prev) => ({ ...prev, slug: event.target.value }))}
                   required
                 />
               </div>

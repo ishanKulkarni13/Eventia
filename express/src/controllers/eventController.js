@@ -5,11 +5,19 @@ import User from '../models/User.js';
  * Admin: create event (minimal fields).
  */
 const createEvent = async (req, res) => {
-  const { title, description, date, location, capacity, assignedVolunteers = [] } = req.body || {};
+  const {
+    title,
+    slug,
+    description,
+    date,
+    location,
+    capacity,
+    assignedVolunteers = [],
+  } = req.body || {};
 
-  if (!title || !description || !date || !location || !capacity) {
+  if (!title || !slug || !description || !date || !location || !capacity) {
     return res.status(400).json({
-      message: 'Title, description, date, location, and capacity are required.',
+      message: 'Title, slug, description, date, location, and capacity are required.',
     });
   }
 
@@ -17,8 +25,15 @@ const createEvent = async (req, res) => {
     return res.status(400).json({ message: 'Capacity must be at least 1.' });
   }
 
+  const normalizedSlug = slug.toLowerCase().trim();
+  const existingSlug = await Event.findOne({ slug: normalizedSlug });
+  if (existingSlug) {
+    return res.status(409).json({ message: 'Event slug already in use.' });
+  }
+
   const event = await Event.create({
     title,
+    slug: normalizedSlug,
     description,
     date,
     location,
@@ -45,10 +60,22 @@ const listEvents = async (req, res) => {
  */
 const updateEvent = async (req, res) => {
   const { eventId } = req.params;
-  const updates = req.body;
+  const updates = req.body || {};
 
   if (!eventId) {
     return res.status(400).json({ message: 'Event ID is required.' });
+  }
+
+  if (updates.slug) {
+    const normalizedSlug = updates.slug.toLowerCase().trim();
+    const existingSlug = await Event.findOne({
+      slug: normalizedSlug,
+      _id: { $ne: eventId },
+    });
+    if (existingSlug) {
+      return res.status(409).json({ message: 'Event slug already in use.' });
+    }
+    updates.slug = normalizedSlug;
   }
 
   const event = await Event.findByIdAndUpdate(eventId, updates, { new: true });
@@ -92,7 +119,54 @@ const listAssignedEvents = async (req, res) => {
  */
 const listAvailableEvents = async (req, res) => {
   const events = await Event.find().sort({ createdAt: -1 });
-  return res.json(events);
+  const studentId = req.user.id;
+
+  const response = events.map((event) => {
+    const registeredIds = event.registeredStudents.map((id) => id.toString());
+    const isRegistered = registeredIds.includes(studentId);
+    const remainingCapacity = Math.max(0, event.capacity - registeredIds.length);
+
+    return {
+      _id: event._id,
+      slug: event.slug,
+      title: event.title,
+      description: event.description,
+      date: event.date,
+      location: event.location,
+      capacity: event.capacity,
+      remainingCapacity,
+      isRegistered,
+    };
+  });
+
+  return res.json(response);
+};
+
+/**
+ * Student: register for event by slug.
+ */
+const registerForEvent = async (req, res) => {
+  const { eventId } = req.params;
+  const studentId = req.user.id;
+
+  const event = await Event.findOne({ slug: eventId });
+  if (!event) {
+    return res.status(404).json({ message: 'Event not found.' });
+  }
+
+  const registeredIds = event.registeredStudents.map((id) => id.toString());
+  if (registeredIds.includes(studentId)) {
+    return res.status(400).json({ message: 'You are already registered for this event.' });
+  }
+
+  if (registeredIds.length >= event.capacity) {
+    return res.status(400).json({ message: 'Event capacity is full.' });
+  }
+
+  event.registeredStudents.push(studentId);
+  await event.save();
+
+  return res.status(201).json({ message: 'Registration successful.' });
 };
 
 /**
@@ -153,4 +227,5 @@ export {
   listAvailableEvents,
   listVolunteers,
   assignVolunteers,
+  registerForEvent,
 };

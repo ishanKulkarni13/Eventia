@@ -22,6 +22,16 @@ const CreateEventForm = ({ values, onChange, onSubmit, loading }) => {
             />
           </div>
           <div className="grid gap-2">
+            <Label htmlFor="slug">Event ID (slug)</Label>
+            <Input
+              id="slug"
+              value={values.slug}
+              onChange={(event) => onChange('slug', event.target.value)}
+              placeholder="hackathon-kickoff"
+              required
+            />
+          </div>
+          <div className="grid gap-2">
             <Label htmlFor="description">Description</Label>
             <Input
               id="description"

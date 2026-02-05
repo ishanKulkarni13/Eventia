@@ -7,12 +7,14 @@ import mongoose from 'mongoose';
 const eventSchema = new mongoose.Schema(
   {
     title: { type: String, required: true, trim: true },
+    slug: { type: String, required: true, unique: true, lowercase: true, trim: true },
     description: { type: String, required: true, trim: true },
     date: { type: Date, required: true },
     location: { type: String, required: true, trim: true },
     capacity: { type: Number, required: true, min: 1 },
     createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
     assignedVolunteers: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+    registeredStudents: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
   },
   { timestamps: true }
 );

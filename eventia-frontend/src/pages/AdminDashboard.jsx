@@ -24,6 +24,7 @@ const AdminDashboard = () => {
   const [activeSection, setActiveSection] = useState('create');
   const [form, setForm] = useState({
     title: '',
+    slug: '',
     description: '',
     date: '',
     location: '',
@@ -81,6 +82,7 @@ const AdminDashboard = () => {
         method: 'POST',
         body: JSON.stringify({
           title: form.title,
+          slug: form.slug,
           description: form.description,
           date: form.date,
           location: form.location,
@@ -90,7 +92,7 @@ const AdminDashboard = () => {
 
       toast.success('Event created');
       setEvents((prev) => [created, ...prev]);
-      setForm({ title: '', description: '', date: '', location: '', capacity: '' });
+      setForm({ title: '', slug: '', description: '', date: '', location: '', capacity: '' });
       await fetchEvents();
     } catch (error) {
       if (error.message.toLowerCase().includes('authorization') || error.message.toLowerCase().includes('token')) {

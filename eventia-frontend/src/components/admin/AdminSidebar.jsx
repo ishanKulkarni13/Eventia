@@ -1,9 +1,12 @@
 import { CalendarPlus, ClipboardList, PencilLine } from 'lucide-react';
-import AdminProfileCard from './AdminProfileCard';
+import { NavUser } from '../nav-user';
 import {
   Sidebar,
   SidebarContent,
   SidebarFooter,
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
@@ -34,38 +37,47 @@ const sections = [
 
 const AdminSidebar = ({ activeSection, onSectionChange, profile }) => {
   return (
-    <Sidebar variant="inset">
+    <Sidebar variant="inset" className='' >
       <SidebarHeader>
-        <div className="rounded-lg border bg-white px-3 py-2">
-          <p className="text-xs font-medium uppercase text-gray-500">Eventia Admin</p>
-          <p className="text-sm font-semibold text-gray-900">Operations</p>
+        <div className="rounded-lg border bg-background px-3 py-2 shadow-sm">
+          <p className="text-xs font-medium uppercase text-muted-foreground">Eventia Admin</p>
+          <p className="text-sm font-semibold text-foreground">Operations Hub</p>
         </div>
       </SidebarHeader>
-      <SidebarContent>
-        <SidebarMenu>
-          {sections.map((section) => (
-            <SidebarMenuItem key={section.id}>
-              <SidebarMenuButton
-                isActive={activeSection === section.id}
-                onClick={() => onSectionChange(section.id)}
-                className="h-auto items-start gap-3 py-3"
-              >
-                <section.icon className="mt-0.5 size-4" />
-                <div className="flex flex-col text-left">
-                  <span className="text-sm font-medium">{section.label}</span>
-                  <span className="text-xs text-gray-500">{section.description}</span>
-                </div>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-          ))}
-        </SidebarMenu>
-        <SidebarSeparator />
-        <div className="px-3 text-xs text-gray-500">
-          Quick tips: Keep events updated for volunteer and student visibility.
-        </div>
+      <SidebarContent className=''>
+        <SidebarGroup>
+          <SidebarGroupLabel>Admin Actions</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {sections.map((section) => (
+                <SidebarMenuItem key={section.id}>
+                  <SidebarMenuButton
+                    isActive={activeSection === section.id}
+                    onClick={() => onSectionChange(section.id)}
+                    className="h-auto items-start gap-3 py-3"
+                  >
+                    <section.icon className="mt-0.5 size-4" />
+                    <div className="flex flex-col text-left">
+                      <span className="text-sm font-medium">{section.label}</span>
+                      <span className="text-xs text-muted-foreground">{section.description}</span>
+                    </div>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+        
       </SidebarContent>
       <SidebarFooter>
-        <AdminProfileCard profile={profile} />
+        <NavUser
+          user={{
+            name: profile.name,
+            email: profile.email,
+            avatar: profile.avatar,
+            roleLabel: profile.title,
+          }}
+        />
       </SidebarFooter>
     </Sidebar>
   );

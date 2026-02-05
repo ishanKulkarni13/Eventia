@@ -64,7 +64,7 @@ const CreateEventForm = ({ values, onChange, onSubmit, loading }) => {
               required
             />
           </div>
-          <Button type="submit" disabled={loading}>
+          <Button type="submit" disabled={loading} className="w-full">
             {loading ? 'Creating...' : 'Create Event'}
           </Button>
         </form>

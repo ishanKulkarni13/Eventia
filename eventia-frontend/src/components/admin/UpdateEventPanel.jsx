@@ -44,7 +44,7 @@ const UpdateEventPanel = ({ events, onUpdate, loading }) => {
   };
 
   return (
-    <div className="grid gap-6 lg:grid-cols-[1.1fr_1.4fr]">
+    <div className="grid gap-6 lg:grid-cols-[1.05fr_1.45fr]">
       <Card>
         <CardHeader>
           <CardTitle>Select Event</CardTitle>
@@ -60,12 +60,12 @@ const UpdateEventPanel = ({ events, onUpdate, loading }) => {
               onClick={() => handleSelect(event._id)}
               className={`w-full rounded-md border px-3 py-2 text-left text-sm transition ${
                 selectedId === event._id
-                  ? 'border-black bg-gray-50'
-                  : 'border-gray-200 hover:border-gray-300'
+                  ? 'border-primary bg-primary/5'
+                  : 'border-border hover:border-muted-foreground/40'
               }`}
             >
-              <div className="font-medium text-gray-900">{event.title}</div>
-              <div className="text-xs text-gray-500">{event.location || 'Location TBD'}</div>
+              <div className="font-medium text-foreground">{event.title}</div>
+              <div className="text-xs text-muted-foreground">{event.location || 'Location TBD'}</div>
             </button>
           ))}
         </CardContent>
@@ -76,7 +76,7 @@ const UpdateEventPanel = ({ events, onUpdate, loading }) => {
         </CardHeader>
         <CardContent>
           {!selectedEvent ? (
-            <p className="text-sm text-gray-500">Select an event to edit.</p>
+            <p className="text-sm text-muted-foreground">Select an event to edit.</p>
           ) : (
             <form onSubmit={handleSubmit} className="grid gap-4">
               <div className="grid gap-2">

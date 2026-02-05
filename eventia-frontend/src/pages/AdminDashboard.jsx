@@ -130,6 +130,21 @@ const AdminDashboard = () => {
     setForm((prev) => ({ ...prev, [field]: value }));
   };
 
+  const sectionMeta = {
+    create: {
+      title: 'Create Events',
+      subtitle: 'Add new campus events for participation tracking.',
+    },
+    update: {
+      title: 'Update Events',
+      subtitle: 'Edit existing event details quickly.',
+    },
+    manage: {
+      title: 'Manage Events',
+      subtitle: 'Review and clean up events when needed.',
+    },
+  };
+
   const renderSection = () => {
     if (activeSection === 'create') {
       return (
@@ -173,6 +188,8 @@ const AdminDashboard = () => {
       activeSection={activeSection}
       onSectionChange={setActiveSection}
       profile={profile}
+      title={sectionMeta[activeSection].title}
+      subtitle={sectionMeta[activeSection].subtitle}
     >
       {renderSection()}
     </AdminLayout>

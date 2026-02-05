@@ -22,6 +22,12 @@ const sections = [
     icon: CalendarCheck,
   },
   {
+    id: 'attendance',
+    label: 'Mark Attendance',
+    description: 'Enter code or scan QR',
+    icon: CalendarCheck,
+  },
+  {
     id: 'certificates',
     label: 'Certificates',
     description: 'Your participation proofs',

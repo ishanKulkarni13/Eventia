@@ -139,6 +139,8 @@ const listAvailableEvents = async (req, res) => {
       date: event.date,
       location: event.location,
       capacity: event.capacity,
+      attendanceActive: event.attendanceActive,
+      attendanceStartedAt: event.attendanceStartedAt,
       remainingCapacity,
       isRegistered,
     };

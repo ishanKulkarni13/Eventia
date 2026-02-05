@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import StudentCertificatesPanel from '../components/student/StudentCertificatesPanel';
+import StudentAttendancePanel from '../components/student/StudentAttendancePanel';
 import StudentEventList from '../components/student/StudentEventList';
 import StudentLayout from '../components/student/StudentLayout';
 import { authRequest } from '../services/api';
@@ -20,6 +21,7 @@ const StudentDashboard = () => {
   const [events, setEvents] = useState([]);
   const [activeSection, setActiveSection] = useState('available');
   const [registeringId, setRegisteringId] = useState(null);
+  const [attendanceSubmitting, setAttendanceSubmitting] = useState(false);
 
   const handleUnauthorized = () => {
     clearAuth();
@@ -73,10 +75,36 @@ const StudentDashboard = () => {
     }
   };
 
+  const handleAttendanceSubmit = async (eventSlug, code) => {
+    if (!token) return;
+    setAttendanceSubmitting(true);
+    try {
+      await authRequest(`/api/student/events/${eventSlug}/attendance`, token, {
+        method: 'POST',
+        body: JSON.stringify({ code }),
+      });
+      toast.success('Attendance recorded');
+      const data = await authRequest('/api/student/events', token);
+      setEvents(data);
+    } catch (error) {
+      if (error.message.toLowerCase().includes('authorization') || error.message.toLowerCase().includes('token')) {
+        handleUnauthorized();
+      } else {
+        toast.error(error.message);
+      }
+    } finally {
+      setAttendanceSubmitting(false);
+    }
+  };
+
   const sectionMeta = {
     available: {
       title: 'Available Events',
       subtitle: 'Discover events you can attend today.',
+    },
+    attendance: {
+      title: 'Mark Attendance',
+      subtitle: 'Enter the live code or scan the QR at the venue.',
     },
     certificates: {
       title: 'Certificates',
@@ -97,6 +125,12 @@ const StudentDashboard = () => {
           events={events}
           onRegister={handleRegister}
           registeringId={registeringId}
+        />
+      ) : activeSection === 'attendance' ? (
+        <StudentAttendancePanel
+          events={events}
+          onSubmitCode={handleAttendanceSubmit}
+          submitting={attendanceSubmitting}
         />
       ) : (
         <StudentCertificatesPanel />

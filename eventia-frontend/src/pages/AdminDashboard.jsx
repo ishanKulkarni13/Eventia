@@ -1,13 +1,26 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
+import AdminLayout from '../components/admin/AdminLayout';
+import CreateEventForm from '../components/admin/CreateEventForm';
+import EventList from '../components/admin/EventList';
+import ManageEventsPanel from '../components/admin/ManageEventsPanel';
+import UpdateEventPanel from '../components/admin/UpdateEventPanel';
 import { authRequest } from '../services/api';
 import { clearAuth, getToken } from '../services/auth';
+
+const profile = {
+  name: 'Admin User',
+  email: 'admin@eventia.com',
+  title: 'Campus Coordinator',
+  avatar: 'https://ui-avatars.com/api/?name=Admin+User&background=0D0D0D&color=fff',
+};
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
   const token = getToken();
   const [events, setEvents] = useState([]);
+  const [activeSection, setActiveSection] = useState('create');
   const [form, setForm] = useState({
     title: '',
     description: '',
@@ -16,6 +29,7 @@ const AdminDashboard = () => {
     capacity: '',
   });
   const [loading, setLoading] = useState(false);
+  const [deletingId, setDeletingId] = useState(null);
 
   const handleUnauthorized = () => {
     clearAuth();
@@ -41,7 +55,7 @@ const AdminDashboard = () => {
     fetchEvents();
   }, []);
 
-  const handleSubmit = async (event) => {
+  const handleCreate = async (event) => {
     event.preventDefault();
     if (!token) return;
 
@@ -52,7 +66,7 @@ const AdminDashboard = () => {
         body: JSON.stringify({
           title: form.title,
           description: form.description,
-          date: form.date || undefined,
+          date: form.date,
           location: form.location,
           capacity: Number(form.capacity),
         }),
@@ -73,103 +87,95 @@ const AdminDashboard = () => {
     }
   };
 
+  const handleUpdate = async (eventId, updates) => {
+    if (!token) return;
+    setLoading(true);
+    try {
+      await authRequest(`/api/events/${eventId}`, token, {
+        method: 'PATCH',
+        body: JSON.stringify(updates),
+      });
+      toast.success('Event updated');
+      await fetchEvents();
+    } catch (error) {
+      if (error.message.toLowerCase().includes('authorization') || error.message.toLowerCase().includes('token')) {
+        handleUnauthorized();
+      } else {
+        toast.error(error.message);
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDelete = async (eventId) => {
+    if (!token) return;
+    setDeletingId(eventId);
+    try {
+      await authRequest(`/api/events/${eventId}`, token, { method: 'DELETE' });
+      toast.success('Event deleted');
+      await fetchEvents();
+    } catch (error) {
+      if (error.message.toLowerCase().includes('authorization') || error.message.toLowerCase().includes('token')) {
+        handleUnauthorized();
+      } else {
+        toast.error(error.message);
+      }
+    } finally {
+      setDeletingId(null);
+    }
+  };
+
+  const handleChange = (field, value) => {
+    setForm((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const renderSection = () => {
+    if (activeSection === 'create') {
+      return (
+        <div className="grid gap-6 lg:grid-cols-[1.1fr_1.4fr]">
+          <CreateEventForm
+            values={form}
+            onChange={handleChange}
+            onSubmit={handleCreate}
+            loading={loading}
+          />
+          <EventList
+            title="Latest Events"
+            events={events}
+            emptyMessage="No events created yet."
+          />
+        </div>
+      );
+    }
+
+    if (activeSection === 'update') {
+      return (
+        <UpdateEventPanel
+          events={events}
+          onUpdate={handleUpdate}
+          loading={loading}
+        />
+      );
+    }
+
+    return (
+      <ManageEventsPanel
+        events={events}
+        onDelete={handleDelete}
+        deletingId={deletingId}
+      />
+    );
+  };
+
   return (
-    <div className="min-h-screen bg-gray-50 p-8">
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-semibold">Admin Dashboard</h1>
-          <p className="mt-2 text-sm text-gray-500">Create events and review the list.</p>
-        </div>
-        <button
-          className="rounded-md border px-3 py-2 text-sm"
-          onClick={() => {
-            clearAuth();
-            toast.info('Logged out');
-            navigate('/login', { replace: true });
-          }}
-        >
-          Logout
-        </button>
-      </div>
-
-      <form onSubmit={handleSubmit} className="mt-6 grid gap-4 rounded-lg border bg-white p-4">
-        <div className="grid gap-2">
-          <label className="text-sm font-medium">Title</label>
-          <input
-            className="w-full rounded-md border px-3 py-2 text-sm"
-            value={form.title}
-            onChange={(e) => setForm((prev) => ({ ...prev, title: e.target.value }))}
-            required
-          />
-        </div>
-        <div className="grid gap-2">
-          <label className="text-sm font-medium">Description</label>
-          <input
-            className="w-full rounded-md border px-3 py-2 text-sm"
-            value={form.description}
-            onChange={(e) => setForm((prev) => ({ ...prev, description: e.target.value }))}
-            required
-          />
-        </div>
-        <div className="grid gap-2 md:grid-cols-2">
-          <div className="grid gap-2">
-            <label className="text-sm font-medium">Date</label>
-            <input
-              type="date"
-              className="w-full rounded-md border px-3 py-2 text-sm"
-              value={form.date}
-              onChange={(e) => setForm((prev) => ({ ...prev, date: e.target.value }))}
-            />
-          </div>
-          <div className="grid gap-2">
-            <label className="text-sm font-medium">Location</label>
-            <input
-              className="w-full rounded-md border px-3 py-2 text-sm"
-              value={form.location}
-              onChange={(e) => setForm((prev) => ({ ...prev, location: e.target.value }))}
-              required
-            />
-          </div>
-        </div>
-        <div className="grid gap-2">
-          <label className="text-sm font-medium">Capacity</label>
-          <input
-            type="number"
-            min="1"
-            className="w-full rounded-md border px-3 py-2 text-sm"
-            value={form.capacity}
-            onChange={(e) => setForm((prev) => ({ ...prev, capacity: e.target.value }))}
-            required
-          />
-        </div>
-        <button
-          type="submit"
-          className="rounded-md bg-black px-4 py-2 text-sm font-medium text-white disabled:opacity-60"
-          disabled={loading}
-        >
-          {loading ? 'Creating...' : 'Create Event'}
-        </button>
-      </form>
-
-      <div className="mt-8">
-        <h2 className="text-xl font-semibold">All Events</h2>
-        <div className="mt-4 grid gap-3">
-          {events.length === 0 && (
-            <p className="text-sm text-gray-500">No events yet.</p>
-          )}
-          {events.map((event) => (
-            <div key={event._id} className="rounded-lg border bg-white p-4">
-              <h3 className="font-semibold">{event.title}</h3>
-              {event.description && <p className="text-sm text-gray-600">{event.description}</p>}
-              <p className="mt-2 text-xs text-gray-400">
-                {event.date ? new Date(event.date).toLocaleDateString() : 'Date TBD'} · {event.location || 'Location TBD'}
-              </p>
-              <p className="mt-1 text-xs text-gray-400">Capacity: {event.capacity ?? 'N/A'}</p>
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
+    <AdminLayout
+      activeSection={activeSection}
+      onSectionChange={setActiveSection}
+      profile={profile}
+    >
+      {renderSection()}
+    </AdminLayout>
   );
 };
 

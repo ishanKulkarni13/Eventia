@@ -35,8 +35,22 @@ const VolunteerDashboard = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 p-8">
-      <h1 className="text-3xl font-semibold">Volunteer Dashboard</h1>
-      <p className="mt-2 text-sm text-gray-500">Events assigned to you.</p>
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-semibold">Volunteer Dashboard</h1>
+          <p className="mt-2 text-sm text-gray-500">Events assigned to you.</p>
+        </div>
+        <button
+          className="rounded-md border px-3 py-2 text-sm"
+          onClick={() => {
+            clearAuth();
+            toast.info('Logged out');
+            navigate('/login', { replace: true });
+          }}
+        >
+          Logout
+        </button>
+      </div>
 
       <div className="mt-6 grid gap-3">
         {events.length === 0 && (

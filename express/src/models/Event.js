@@ -7,9 +7,10 @@ import mongoose from 'mongoose';
 const eventSchema = new mongoose.Schema(
   {
     title: { type: String, required: true, trim: true },
-    description: { type: String, default: '' },
-    date: { type: Date },
-    location: { type: String, default: '' },
+    description: { type: String, required: true, trim: true },
+    date: { type: Date, required: true },
+    location: { type: String, required: true, trim: true },
+    capacity: { type: Number, required: true, min: 1 },
     createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
     assignedVolunteers: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
   },

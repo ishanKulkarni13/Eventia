@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
-import { Button } from '../components/ui/button';
 import { authRequest } from '../services/api';
 import { clearAuth, getToken } from '../services/auth';
 
@@ -9,7 +8,13 @@ const AdminDashboard = () => {
   const navigate = useNavigate();
   const token = getToken();
   const [events, setEvents] = useState([]);
-  const [form, setForm] = useState({ title: '', description: '', date: '', location: '' });
+  const [form, setForm] = useState({
+    title: '',
+    description: '',
+    date: '',
+    location: '',
+    capacity: '',
+  });
   const [loading, setLoading] = useState(false);
 
   const handleUnauthorized = () => {
@@ -49,12 +54,14 @@ const AdminDashboard = () => {
           description: form.description,
           date: form.date || undefined,
           location: form.location,
+          capacity: Number(form.capacity),
         }),
       });
 
       toast.success('Event created');
       setEvents((prev) => [created, ...prev]);
-      setForm({ title: '', description: '', date: '', location: '' });
+      setForm({ title: '', description: '', date: '', location: '', capacity: '' });
+      await fetchEvents();
     } catch (error) {
       if (error.message.toLowerCase().includes('authorization') || error.message.toLowerCase().includes('token')) {
         handleUnauthorized();
@@ -68,8 +75,22 @@ const AdminDashboard = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 p-8">
-      <h1 className="text-3xl font-semibold">Admin Dashboard</h1>
-      <p className="mt-2 text-sm text-gray-500">Create events and review the list.</p>
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-semibold">Admin Dashboard</h1>
+          <p className="mt-2 text-sm text-gray-500">Create events and review the list.</p>
+        </div>
+        <button
+          className="rounded-md border px-3 py-2 text-sm"
+          onClick={() => {
+            clearAuth();
+            toast.info('Logged out');
+            navigate('/login', { replace: true });
+          }}
+        >
+          Logout
+        </button>
+      </div>
 
       <form onSubmit={handleSubmit} className="mt-6 grid gap-4 rounded-lg border bg-white p-4">
         <div className="grid gap-2">
@@ -87,6 +108,7 @@ const AdminDashboard = () => {
             className="w-full rounded-md border px-3 py-2 text-sm"
             value={form.description}
             onChange={(e) => setForm((prev) => ({ ...prev, description: e.target.value }))}
+            required
           />
         </div>
         <div className="grid gap-2 md:grid-cols-2">
@@ -105,12 +127,28 @@ const AdminDashboard = () => {
               className="w-full rounded-md border px-3 py-2 text-sm"
               value={form.location}
               onChange={(e) => setForm((prev) => ({ ...prev, location: e.target.value }))}
+              required
             />
           </div>
         </div>
-        <Button type="submit" disabled={loading}>
+        <div className="grid gap-2">
+          <label className="text-sm font-medium">Capacity</label>
+          <input
+            type="number"
+            min="1"
+            className="w-full rounded-md border px-3 py-2 text-sm"
+            value={form.capacity}
+            onChange={(e) => setForm((prev) => ({ ...prev, capacity: e.target.value }))}
+            required
+          />
+        </div>
+        <button
+          type="submit"
+          className="rounded-md bg-black px-4 py-2 text-sm font-medium text-white disabled:opacity-60"
+          disabled={loading}
+        >
           {loading ? 'Creating...' : 'Create Event'}
-        </Button>
+        </button>
       </form>
 
       <div className="mt-8">
@@ -126,6 +164,7 @@ const AdminDashboard = () => {
               <p className="mt-2 text-xs text-gray-400">
                 {event.date ? new Date(event.date).toLocaleDateString() : 'Date TBD'} · {event.location || 'Location TBD'}
               </p>
+              <p className="mt-1 text-xs text-gray-400">Capacity: {event.capacity ?? 'N/A'}</p>
             </div>
           ))}
         </div>

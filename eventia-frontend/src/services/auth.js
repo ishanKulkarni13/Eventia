@@ -15,6 +15,18 @@ const login = async ({ email, password }) => {
   return data.user;
 };
 
+const signup = async ({ name, email, password, role }) => {
+  const data = await request('/api/auth/signup', {
+    method: 'POST',
+    body: JSON.stringify({ name, email, password, role }),
+  });
+
+  localStorage.setItem(TOKEN_KEY, data.token);
+  localStorage.setItem(ROLE_KEY, data.user.role);
+
+  return data.user;
+};
+
 const getRole = () => localStorage.getItem(ROLE_KEY);
 const getToken = () => localStorage.getItem(TOKEN_KEY);
 
@@ -23,4 +35,4 @@ const clearAuth = () => {
   localStorage.removeItem(ROLE_KEY);
 };
 
-export { login, getRole, getToken, clearAuth };
+export { login, signup, getRole, getToken, clearAuth };

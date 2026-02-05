@@ -158,7 +158,7 @@ const ManageEventsPanel = ({
                   </Dialog>
                 </div>
 
-                <div className="mt-4 overflow-hidden rounded-lg border">
+                <div className="mt-4 mx-auto max-w-xs sm:max-w-full overflow-y-scroll rounded-lg border">
                   <table className="w-full text-sm">
                     <thead className="bg-muted/60 text-xs uppercase text-muted-foreground">
                       <tr>

@@ -6,6 +6,7 @@ import StudentDashboard from './pages/StudentDashboard';
 import VolunteerDashboard from './pages/VolunteerDashboard';
 import { getRole, getToken } from './services/auth';
 import { Toaster } from './components/ui/sonner';
+import { ModeToggle } from './components/mode-toggle';
 
 const RoleRedirect = () => {
   const token = getToken();
@@ -39,6 +40,9 @@ function App() {
   return (
     <>
       <Toaster richColors />
+      <div className="fixed right-4 top-4 z-50">
+        <ModeToggle />
+      </div>
       <Routes>
         <Route path="/" element={<RoleRedirect />} />
         <Route path="/login" element={<Login />} />

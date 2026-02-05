@@ -8,6 +8,9 @@ const port = process.env.PORT || 3000;
 
 const startServer = async () => {
   try {
+    if (!process.env.JWT_SECRET) {
+      throw new Error('JWT_SECRET is not set in the environment');
+    }
     await connectDB();
     await seedUsers();
     app.listen(port, () => {

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
 import { Button } from '../components/ui/button';
 import { login } from '../services/auth';
 
@@ -13,19 +14,18 @@ const Login = () => {
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    setError('');
     setLoading(true);
 
     try {
       const user = await login({ email, password });
+      toast.success(`Welcome ${user.name}`);
       navigate(roleRedirectMap[user.role] || '/login', { replace: true });
     } catch (err) {
-      setError(err.message);
+      toast.error(err.message);
     } finally {
       setLoading(false);
     }
@@ -63,8 +63,6 @@ const Login = () => {
               required
             />
           </div>
-
-          {error && <p className="text-sm text-red-600">{error}</p>}
 
           <Button type="submit" className="w-full" disabled={loading}>
             {loading ? 'Signing in...' : 'Sign in'}

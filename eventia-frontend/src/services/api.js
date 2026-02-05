@@ -19,4 +19,14 @@ const request = async (path, options = {}) => {
   return data;
 };
 
-export { API_BASE_URL, request };
+const authRequest = async (path, token, options = {}) => {
+  return request(path, {
+    ...options,
+    headers: {
+      Authorization: `Bearer ${token}`,
+      ...(options.headers || {}),
+    },
+  });
+};
+
+export { API_BASE_URL, request, authRequest };

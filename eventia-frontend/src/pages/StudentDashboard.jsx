@@ -1,17 +1,34 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
+import StudentCertificatesPanel from '../components/student/StudentCertificatesPanel';
+import StudentEventList from '../components/student/StudentEventList';
+import StudentLayout from '../components/student/StudentLayout';
 import { authRequest } from '../services/api';
 import { clearAuth, getToken } from '../services/auth';
+
+const profile = {
+  name: 'Student User',
+  email: 'student@eventia.com',
+  title: 'Student Participant',
+  avatar: 'https://ui-avatars.com/api/?name=Student+User&background=0D0D0D&color=fff',
+};
 
 const StudentDashboard = () => {
   const navigate = useNavigate();
   const token = getToken();
   const [events, setEvents] = useState([]);
+  const [activeSection, setActiveSection] = useState('available');
 
   const handleUnauthorized = () => {
     clearAuth();
     toast.error('Session expired. Please log in again.');
+    navigate('/login', { replace: true });
+  };
+
+  const handleLogout = () => {
+    clearAuth();
+    toast.info('Logged out');
     navigate('/login', { replace: true });
   };
 
@@ -33,40 +50,31 @@ const StudentDashboard = () => {
     fetchEvents();
   }, []);
 
-  return (
-    <div className="min-h-screen bg-gray-50 p-8">
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-semibold">Student Dashboard</h1>
-          <p className="mt-2 text-sm text-gray-500">Available events you can attend.</p>
-        </div>
-        <button
-          className="rounded-md border px-3 py-2 text-sm"
-          onClick={() => {
-            clearAuth();
-            toast.info('Logged out');
-            navigate('/login', { replace: true });
-          }}
-        >
-          Logout
-        </button>
-      </div>
+  const sectionMeta = {
+    available: {
+      title: 'Available Events',
+      subtitle: 'Discover events you can attend today.',
+    },
+    certificates: {
+      title: 'Certificates',
+      subtitle: 'View your verified participation proofs.',
+    },
+  };
 
-      <div className="mt-6 grid gap-3">
-        {events.length === 0 && (
-          <p className="text-sm text-gray-500">No events available yet.</p>
-        )}
-        {events.map((event) => (
-          <div key={event._id} className="rounded-lg border bg-white p-4">
-            <h3 className="font-semibold">{event.title}</h3>
-            {event.description && <p className="text-sm text-gray-600">{event.description}</p>}
-            <p className="mt-2 text-xs text-gray-400">
-              {event.date ? new Date(event.date).toLocaleDateString() : 'Date TBD'} · {event.location || 'Location TBD'}
-            </p>
-          </div>
-        ))}
-      </div>
-    </div>
+  return (
+    <StudentLayout
+      activeSection={activeSection}
+      onSectionChange={setActiveSection}
+      profile={{ ...profile, onLogout: handleLogout }}
+      title={sectionMeta[activeSection].title}
+      subtitle={sectionMeta[activeSection].subtitle}
+    >
+      {activeSection === 'available' ? (
+        <StudentEventList events={events} />
+      ) : (
+        <StudentCertificatesPanel />
+      )}
+    </StudentLayout>
   );
 };
 

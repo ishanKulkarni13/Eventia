@@ -1,3 +1,4 @@
+import speakeasy from 'speakeasy';
 import Event from '../models/Event.js';
 import User from '../models/User.js';
 
@@ -31,6 +32,8 @@ const createEvent = async (req, res) => {
     return res.status(409).json({ message: 'Event slug already in use.' });
   }
 
+  const attendanceSecret = speakeasy.generateSecret({ length: 20 }).base32;
+
   const event = await Event.create({
     title,
     slug: normalizedSlug,
@@ -40,6 +43,7 @@ const createEvent = async (req, res) => {
     capacity,
     createdBy: req.user.id,
     assignedVolunteers,
+    attendanceSecret,
   });
 
   return res.status(201).json(event);

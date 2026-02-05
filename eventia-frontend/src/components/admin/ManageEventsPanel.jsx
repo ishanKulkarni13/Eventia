@@ -26,6 +26,11 @@ const ManageEventsPanel = ({
   volunteers,
   onDelete,
   onAssign,
+  onStartAttendance,
+  onStopAttendance,
+  onFetchAttendance,
+  attendanceRecords,
+  attendanceLoading,
   deletingId,
   assigning,
 }) => {
@@ -50,6 +55,13 @@ const ManageEventsPanel = ({
   const availableVolunteers = volunteers.filter(
     (volunteer) => !assignedVolunteerIds.includes(volunteer._id)
   );
+
+  const currentAttendance = selectedEvent ? attendanceRecords[selectedEvent.slug] : null;
+
+  const handleAttendanceLoad = () => {
+    if (!selectedEvent) return;
+    onFetchAttendance(selectedEvent.slug);
+  };
 
   return (
     <div className="grid gap-6">
@@ -84,11 +96,16 @@ const ManageEventsPanel = ({
           {!selectedEvent ? (
             <p className="text-sm text-muted-foreground">Select an event to manage.</p>
           ) : (
-            <Tabs defaultValue="general" className="w-full">
+            <Tabs defaultValue="general" className="w-full" onValueChange={(value) => {
+              if (value === 'attendance') {
+                handleAttendanceLoad();
+              }
+            }}>
               <TabsList className="w-full justify-start">
                 <TabsTrigger value="general">General</TabsTrigger>
                 <TabsTrigger value="volunteers">Volunteers</TabsTrigger>
                 <TabsTrigger value="students">Students</TabsTrigger>
+                <TabsTrigger value="attendance">Attendance</TabsTrigger>
               </TabsList>
 
               <TabsContent value="general">
@@ -299,6 +316,93 @@ const ManageEventsPanel = ({
                             </td>
                           </tr>
                         ))
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </TabsContent>
+
+              <TabsContent value="attendance">
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <div>
+                    <p className="text-sm font-medium text-foreground">Attendance Status</p>
+                    <p className="text-xs text-muted-foreground">Start or stop attendance for this event.</p>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button
+                      variant="default"
+                      onClick={() => onStartAttendance(selectedEvent.slug)}
+                      disabled={assigning}
+                    >
+                      Start
+                    </Button>
+                    <Button
+                      variant="outline"
+                      onClick={() => onStopAttendance(selectedEvent.slug)}
+                      disabled={assigning}
+                    >
+                      Stop
+                    </Button>
+                  </div>
+                </div>
+
+                <div className="mt-4 rounded-lg border bg-background p-4 text-sm">
+                  <div className="flex items-center justify-between">
+                    <span className="text-muted-foreground">Current status</span>
+                    <span className={selectedEvent.attendanceActive ? 'text-emerald-600' : 'text-muted-foreground'}>
+                      {selectedEvent.attendanceActive ? 'Active' : 'Inactive'}
+                    </span>
+                  </div>
+                  <div className="mt-2 text-xs text-muted-foreground">
+                    {selectedEvent.attendanceStartedAt
+                      ? `Started at: ${new Date(selectedEvent.attendanceStartedAt).toLocaleString()}`
+                      : 'Not started yet.'}
+                  </div>
+                </div>
+
+                <div className="mt-6 flex items-center justify-between">
+                  <p className="text-sm font-medium text-foreground">Attendance Records</p>
+                  <Button variant="outline" size="sm" onClick={handleAttendanceLoad}>
+                    Refresh
+                  </Button>
+                </div>
+
+                <div className="mt-3 overflow-hidden rounded-lg border">
+                  <table className="w-full text-sm">
+                    <thead className="bg-muted/60 text-xs uppercase text-muted-foreground">
+                      <tr>
+                        <th className="px-4 py-3 text-left">Student</th>
+                        <th className="px-4 py-3 text-left">Email</th>
+                        <th className="px-4 py-3 text-right">Timestamp</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {attendanceLoading ? (
+                        <tr>
+                          <td className="px-4 py-3 text-muted-foreground" colSpan={3}>
+                            Loading attendance...
+                          </td>
+                        </tr>
+                      ) : currentAttendance?.records?.length ? (
+                        currentAttendance.records.map((record) => (
+                          <tr key={record._id} className="border-t">
+                            <td className="px-4 py-3">
+                              {record.student?.name || 'Unknown'}
+                            </td>
+                            <td className="px-4 py-3 text-muted-foreground">
+                              {record.student?.email || '—'}
+                            </td>
+                            <td className="px-4 py-3 text-right text-muted-foreground">
+                              {new Date(record.timestamp).toLocaleString()}
+                            </td>
+                          </tr>
+                        ))
+                      ) : (
+                        <tr>
+                          <td className="px-4 py-3 text-muted-foreground" colSpan={3}>
+                            No attendance records yet.
+                          </td>
+                        </tr>
                       )}
                     </tbody>
                   </table>

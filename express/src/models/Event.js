@@ -15,6 +15,9 @@ const eventSchema = new mongoose.Schema(
     createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
     assignedVolunteers: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
     registeredStudents: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+    attendanceSecret: { type: String, required: true },
+    attendanceActive: { type: Boolean, default: false },
+    attendanceStartedAt: { type: Date },
   },
   { timestamps: true }
 );

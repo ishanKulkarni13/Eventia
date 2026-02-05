@@ -21,6 +21,7 @@ const AdminDashboard = () => {
   const token = getToken();
   const [events, setEvents] = useState([]);
   const [volunteers, setVolunteers] = useState([]);
+  const [attendanceRecords, setAttendanceRecords] = useState({});
   const [activeSection, setActiveSection] = useState('create');
   const [form, setForm] = useState({
     title: '',
@@ -31,6 +32,7 @@ const AdminDashboard = () => {
     capacity: '',
   });
   const [loading, setLoading] = useState(false);
+  const [attendanceLoading, setAttendanceLoading] = useState(false);
   const [deletingId, setDeletingId] = useState(null);
 
   const handleUnauthorized = () => {
@@ -165,6 +167,59 @@ const AdminDashboard = () => {
     }
   };
 
+  const handleStartAttendance = async (eventSlug) => {
+    if (!token) return;
+    setLoading(true);
+    try {
+      await authRequest(`/api/attendance/${eventSlug}/start`, token, { method: 'POST' });
+      toast.success('Attendance started');
+      await fetchEvents();
+    } catch (error) {
+      if (error.message.toLowerCase().includes('authorization') || error.message.toLowerCase().includes('token')) {
+        handleUnauthorized();
+      } else {
+        toast.error(error.message);
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleStopAttendance = async (eventSlug) => {
+    if (!token) return;
+    setLoading(true);
+    try {
+      await authRequest(`/api/attendance/${eventSlug}/stop`, token, { method: 'POST' });
+      toast.success('Attendance stopped');
+      await fetchEvents();
+    } catch (error) {
+      if (error.message.toLowerCase().includes('authorization') || error.message.toLowerCase().includes('token')) {
+        handleUnauthorized();
+      } else {
+        toast.error(error.message);
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleFetchAttendance = async (eventSlug) => {
+    if (!token) return;
+    setAttendanceLoading(true);
+    try {
+      const data = await authRequest(`/api/attendance/${eventSlug}/records`, token);
+      setAttendanceRecords((prev) => ({ ...prev, [eventSlug]: data }));
+    } catch (error) {
+      if (error.message.toLowerCase().includes('authorization') || error.message.toLowerCase().includes('token')) {
+        handleUnauthorized();
+      } else {
+        toast.error(error.message);
+      }
+    } finally {
+      setAttendanceLoading(false);
+    }
+  };
+
   const handleChange = (field, value) => {
     setForm((prev) => ({ ...prev, [field]: value }));
   };
@@ -221,6 +276,11 @@ const AdminDashboard = () => {
         volunteers={volunteers}
         onAssign={handleAssignVolunteers}
         assigning={loading}
+        onStartAttendance={handleStartAttendance}
+        onStopAttendance={handleStopAttendance}
+        onFetchAttendance={handleFetchAttendance}
+        attendanceRecords={attendanceRecords}
+        attendanceLoading={attendanceLoading}
       />
     );
   };

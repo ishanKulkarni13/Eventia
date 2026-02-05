@@ -51,6 +51,7 @@ const createEvent = async (req, res) => {
 const listEvents = async (req, res) => {
   const events = await Event.find()
     .populate('assignedVolunteers', 'name email role')
+    .populate('registeredStudents', 'name email role')
     .sort({ createdAt: -1 });
   return res.json(events);
 };

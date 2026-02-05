@@ -4,6 +4,8 @@ import AdminDashboard from './pages/AdminDashboard';
 import Login from './pages/Login';
 import StudentDashboard from './pages/StudentDashboard';
 import VolunteerDashboard from './pages/VolunteerDashboard';
+import VolunteerHome from './pages/volunteer/VolunteerHome';
+import VolunteerProfile from './pages/volunteer/VolunteerProfile';
 import { getRole, getToken } from './services/auth';
 import { Toaster } from './components/ui/sonner';
 import { ModeToggle } from './components/mode-toggle';
@@ -61,7 +63,10 @@ function App() {
               <VolunteerDashboard />
             </ProtectedRoute>
           }
-        />
+        >
+          <Route index element={<VolunteerHome />} />
+          <Route path="profile" element={<VolunteerProfile />} />
+        </Route>
         <Route
           path="/student"
           element={

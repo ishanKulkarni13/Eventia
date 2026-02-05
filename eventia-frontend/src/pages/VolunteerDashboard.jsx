@@ -1,72 +1,30 @@
-import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
-import { authRequest } from '../services/api';
-import { clearAuth, getToken } from '../services/auth';
+import VolunteerLayout from '../components/volunteer/VolunteerLayout';
+import { clearAuth } from '../services/auth';
+
+const profile = {
+  name: 'Volunteer User',
+  email: 'volunteer@eventia.com',
+  title: 'Event Volunteer',
+  avatar: 'https://ui-avatars.com/api/?name=Volunteer+User&background=0D0D0D&color=fff',
+};
 
 const VolunteerDashboard = () => {
   const navigate = useNavigate();
-  const token = getToken();
-  const [events, setEvents] = useState([]);
 
-  const handleUnauthorized = () => {
+  const handleLogout = () => {
     clearAuth();
-    toast.error('Session expired. Please log in again.');
+    toast.info('Logged out');
     navigate('/login', { replace: true });
   };
 
-  useEffect(() => {
-    const fetchEvents = async () => {
-      if (!token) return;
-      try {
-        const data = await authRequest('/api/volunteer/events', token);
-        setEvents(data);
-      } catch (error) {
-        if (error.message.toLowerCase().includes('authorization') || error.message.toLowerCase().includes('token')) {
-          handleUnauthorized();
-        } else {
-          toast.error(error.message);
-        }
-      }
-    };
-
-    fetchEvents();
-  }, []);
-
   return (
-    <div className="min-h-screen bg-gray-50 p-8">
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-semibold">Volunteer Dashboard</h1>
-          <p className="mt-2 text-sm text-gray-500">Events assigned to you.</p>
-        </div>
-        <button
-          className="rounded-md border px-3 py-2 text-sm"
-          onClick={() => {
-            clearAuth();
-            toast.info('Logged out');
-            navigate('/login', { replace: true });
-          }}
-        >
-          Logout
-        </button>
-      </div>
-
-      <div className="mt-6 grid gap-3">
-        {events.length === 0 && (
-          <p className="text-sm text-gray-500">No assigned events yet.</p>
-        )}
-        {events.map((event) => (
-          <div key={event._id} className="rounded-lg border bg-white p-4">
-            <h3 className="font-semibold">{event.title}</h3>
-            {event.description && <p className="text-sm text-gray-600">{event.description}</p>}
-            <p className="mt-2 text-xs text-gray-400">
-              {event.date ? new Date(event.date).toLocaleDateString() : 'Date TBD'} · {event.location || 'Location TBD'}
-            </p>
-          </div>
-        ))}
-      </div>
-    </div>
+    <VolunteerLayout
+      profile={{ ...profile, onLogout: handleLogout }}
+      title="Volunteer Hub"
+      subtitle="Track assigned events and updates."
+    />
   );
 };
 

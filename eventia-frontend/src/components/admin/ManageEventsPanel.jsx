@@ -39,6 +39,9 @@ const ManageEventsPanel = ({
   const assignedVolunteers = Array.isArray(selectedEvent?.assignedVolunteers)
     ? selectedEvent.assignedVolunteers
     : [];
+  const registeredStudents = Array.isArray(selectedEvent?.registeredStudents)
+    ? selectedEvent.registeredStudents
+    : [];
 
   const assignedVolunteerIds = assignedVolunteers.map((volunteer) =>
     typeof volunteer === 'string' ? volunteer : volunteer._id
@@ -230,11 +233,76 @@ const ManageEventsPanel = ({
               </TabsContent>
 
               <TabsContent value="students">
-                <Card className="border-dashed">
-                  <CardContent className="py-6 text-sm text-muted-foreground">
-                    Student assignment tools will be added in the next milestone.
-                  </CardContent>
-                </Card>
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <div>
+                    <p className="text-sm font-medium text-foreground">Registered Students</p>
+                    <p className="text-xs text-muted-foreground">View students registered for this event.</p>
+                  </div>
+                </div>
+
+                <div className="mt-4 overflow-hidden rounded-lg border">
+                  <table className="w-full text-sm">
+                    <thead className="bg-muted/60 text-xs uppercase text-muted-foreground">
+                      <tr>
+                        <th className="px-4 py-3 text-left">Student</th>
+                        <th className="px-4 py-3 text-left">Email</th>
+                        <th className="px-4 py-3 text-right">Action</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {registeredStudents.length === 0 ? (
+                        <tr>
+                          <td className="px-4 py-3 text-muted-foreground" colSpan={3}>
+                            No students registered yet.
+                          </td>
+                        </tr>
+                      ) : (
+                        registeredStudents.map((student) => (
+                          <tr key={student._id || student} className="border-t">
+                            <td className="px-4 py-3">
+                              {typeof student === 'string' ? student : student.name}
+                            </td>
+                            <td className="px-4 py-3 text-muted-foreground">
+                              {typeof student === 'string' ? '—' : student.email}
+                            </td>
+                            <td className="px-4 py-3 text-right">
+                              <Dialog>
+                                <DialogTrigger asChild>
+                                  <Button variant="outline" size="sm">
+                                    View
+                                  </Button>
+                                </DialogTrigger>
+                                <DialogContent>
+                                  <DialogHeader>
+                                    <DialogTitle>Student details</DialogTitle>
+                                    <DialogDescription>
+                                      Registered for this event.
+                                    </DialogDescription>
+                                  </DialogHeader>
+                                  <div className="space-y-2">
+                                    <Label>Name</Label>
+                                    <Input
+                                      value={typeof student === 'string' ? student : student.name}
+                                      disabled
+                                    />
+                                    <Label>Email</Label>
+                                    <Input
+                                      value={typeof student === 'string' ? '—' : student.email}
+                                      disabled
+                                    />
+                                  </div>
+                                  <DialogFooter>
+                                    <Button variant="secondary">Close</Button>
+                                  </DialogFooter>
+                                </DialogContent>
+                              </Dialog>
+                            </td>
+                          </tr>
+                        ))
+                      )}
+                    </tbody>
+                  </table>
+                </div>
               </TabsContent>
             </Tabs>
           )}

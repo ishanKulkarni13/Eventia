@@ -20,6 +20,7 @@ const AdminDashboard = () => {
   const navigate = useNavigate();
   const token = getToken();
   const [events, setEvents] = useState([]);
+  const [volunteers, setVolunteers] = useState([]);
   const [activeSection, setActiveSection] = useState('create');
   const [form, setForm] = useState({
     title: '',
@@ -51,8 +52,23 @@ const AdminDashboard = () => {
     }
   };
 
+  const fetchVolunteers = async () => {
+    if (!token) return;
+    try {
+      const data = await authRequest('/api/volunteers', token);
+      setVolunteers(data);
+    } catch (error) {
+      if (error.message.toLowerCase().includes('authorization') || error.message.toLowerCase().includes('token')) {
+        handleUnauthorized();
+      } else {
+        toast.error(error.message);
+      }
+    }
+  };
+
   useEffect(() => {
     fetchEvents();
+    fetchVolunteers();
   }, []);
 
   const handleCreate = async (event) => {
@@ -126,6 +142,27 @@ const AdminDashboard = () => {
     }
   };
 
+  const handleAssignVolunteers = async (eventId, volunteerIds) => {
+    if (!token) return;
+    setLoading(true);
+    try {
+      await authRequest(`/api/events/${eventId}/volunteers`, token, {
+        method: 'PUT',
+        body: JSON.stringify({ volunteerIds }),
+      });
+      toast.success('Volunteer assignments updated');
+      await fetchEvents();
+    } catch (error) {
+      if (error.message.toLowerCase().includes('authorization') || error.message.toLowerCase().includes('token')) {
+        handleUnauthorized();
+      } else {
+        toast.error(error.message);
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleChange = (field, value) => {
     setForm((prev) => ({ ...prev, [field]: value }));
   };
@@ -179,6 +216,9 @@ const AdminDashboard = () => {
         events={events}
         onDelete={handleDelete}
         deletingId={deletingId}
+        volunteers={volunteers}
+        onAssign={handleAssignVolunteers}
+        assigning={loading}
       />
     );
   };

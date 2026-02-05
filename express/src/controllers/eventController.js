@@ -1,12 +1,11 @@
 import Event from '../models/Event.js';
+import User from '../models/User.js';
 
 /**
  * Admin: create event (minimal fields).
  */
 const createEvent = async (req, res) => {
-  const { title, description, date, location, capacity, assignedVolunteers = [] } = await req.body || {};
-
-    console.log(title, description, date, location, capacity, assignedVolunteers)
+  const { title, description, date, location, capacity, assignedVolunteers = [] } = req.body || {};
 
   if (!title || !description || !date || !location || !capacity) {
     return res.status(400).json({
@@ -35,7 +34,9 @@ const createEvent = async (req, res) => {
  * Admin: list all events.
  */
 const listEvents = async (req, res) => {
-  const events = await Event.find().sort({ createdAt: -1 });
+  const events = await Event.find()
+    .populate('assignedVolunteers', 'name email role')
+    .sort({ createdAt: -1 });
   return res.json(events);
 };
 
@@ -94,6 +95,55 @@ const listAvailableEvents = async (req, res) => {
   return res.json(events);
 };
 
+/**
+ * Admin: list all volunteers for assignment.
+ */
+const listVolunteers = async (req, res) => {
+  const volunteers = await User.find({ role: 'volunteer' })
+    .select('name email role')
+    .sort({ name: 1 });
+  return res.json(volunteers);
+};
+
+/**
+ * Admin: assign volunteers to event (replace list).
+ */
+const assignVolunteers = async (req, res) => {
+  const { eventId } = req.params;
+  const { volunteerIds = [] } = req.body || {};
+
+  if (!eventId) {
+    return res.status(400).json({ message: 'Event ID is required.' });
+  }
+
+  if (!Array.isArray(volunteerIds)) {
+    return res.status(400).json({ message: 'volunteerIds must be an array.' });
+  }
+
+  const uniqueIds = [...new Set(volunteerIds)];
+
+  const volunteerCount = await User.countDocuments({
+    _id: { $in: uniqueIds },
+    role: 'volunteer',
+  });
+
+  if (volunteerCount !== uniqueIds.length) {
+    return res.status(400).json({ message: 'One or more volunteers are invalid.' });
+  }
+
+  const event = await Event.findByIdAndUpdate(
+    eventId,
+    { assignedVolunteers: uniqueIds },
+    { new: true }
+  ).populate('assignedVolunteers', 'name email role');
+
+  if (!event) {
+    return res.status(404).json({ message: 'Event not found.' });
+  }
+
+  return res.json(event);
+};
+
 export {
   createEvent,
   listEvents,
@@ -101,4 +151,6 @@ export {
   deleteEvent,
   listAssignedEvents,
   listAvailableEvents,
+  listVolunteers,
+  assignVolunteers,
 };

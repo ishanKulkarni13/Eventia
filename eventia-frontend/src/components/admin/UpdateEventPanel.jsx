@@ -3,6 +3,13 @@ import { Button } from '../ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Input } from '../ui/input';
 import { Label } from '../ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '../ui/select';
 
 const UpdateEventPanel = ({ events, onUpdate, loading }) => {
   const [selectedId, setSelectedId] = useState('');
@@ -44,30 +51,28 @@ const UpdateEventPanel = ({ events, onUpdate, loading }) => {
   };
 
   return (
-    <div className="grid gap-6 lg:grid-cols-[1.05fr_1.45fr]">
+    <div className="grid gap-6">
       <Card>
         <CardHeader>
           <CardTitle>Select Event</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-2">
-          {events.length === 0 && (
-            <p className="text-sm text-gray-500">No events to update.</p>
+        <CardContent>
+          {events.length === 0 ? (
+            <p className="text-sm text-muted-foreground">No events to update.</p>
+          ) : (
+            <Select value={selectedId} onValueChange={handleSelect}>
+              <SelectTrigger>
+                <SelectValue placeholder="Choose an event" />
+              </SelectTrigger>
+              <SelectContent>
+                {events.map((event) => (
+                  <SelectItem key={event._id} value={event._id}>
+                    {event.title}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           )}
-          {events.map((event) => (
-            <button
-              key={event._id}
-              type="button"
-              onClick={() => handleSelect(event._id)}
-              className={`w-full rounded-md border px-3 py-2 text-left text-sm transition ${
-                selectedId === event._id
-                  ? 'border-primary bg-primary/5'
-                  : 'border-border hover:border-muted-foreground/40'
-              }`}
-            >
-              <div className="font-medium text-foreground">{event.title}</div>
-              <div className="text-xs text-muted-foreground">{event.location || 'Location TBD'}</div>
-            </button>
-          ))}
         </CardContent>
       </Card>
       <Card>

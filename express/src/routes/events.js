@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import {
 	createEvent,
+	assignVolunteers,
 	deleteEvent,
 	listEvents,
 	updateEvent,
@@ -14,5 +15,6 @@ router.post('/', requireAuth, requireRole(['admin']), createEvent);
 router.get('/', requireAuth, requireRole(['admin']), listEvents);
 router.patch('/:eventId', requireAuth, requireRole(['admin']), updateEvent);
 router.delete('/:eventId', requireAuth, requireRole(['admin']), deleteEvent);
+router.put('/:eventId/volunteers', requireAuth, requireRole(['admin']), assignVolunteers);
 
 export default router;

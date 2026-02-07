@@ -1,6 +1,6 @@
-# AlphaByte
+# Eventia
 
-AlphaByte is a **campus participation intelligence platform** built for AlphaByte Hackathon (PS-4: The Unified Campus Events Fabric).
+Eventia is a **campus participation intelligence platform** built for AlphaByte Hackathon (PS-4: The Unified Campus Events Fabric).
 
 It treats campus events as **long-term participation records**, not one-time activities.
 
@@ -21,7 +21,7 @@ As a result, **participation lacks trust, traceability, and visibility**.
 
 ## 💡 Solution
 
-AlphaByte introduces a **secure, end-to-end participation pipeline**:
+Eventia introduces a **secure, end-to-end participation pipeline**:
 
 - Role-based event management
 - Time-bound attendance verification
@@ -131,4 +131,4 @@ Setup instructions are documented separately.
 
 ## 📌 One-Line Summary
 
-> “AlphaByte creates a secure participation-to-verification pipeline that turns campus events into trusted, long-term participation records.”
+> “Eventia creates a secure participation-to-verification pipeline that turns campus events into trusted, long-term participation records.”

@@ -41,7 +41,7 @@ Vite will print the local dev URL in the terminal.
    ```
 
 ### Configure
-Set your MongoDB connection string in the backend environment (commonly `MONGO_URI`). If you already have a `.env` file or config in place, update it with your database URI.
+Refer to the .env.example and set your MongoDB connection string (MONGODB_URI )and JWT_SECRET in the backend environment.
 
 ### Run (dev with nodemon)
 ```
